@@ -24,6 +24,7 @@ export function useChatConductor(conversationId: number) {
   const {
     openAiApiKey,
     googleApiKey,
+    mistralApiKey,
     autoAdvance,
     maxAutoAdvance,
     maxContextMessages,
@@ -138,7 +139,7 @@ export function useChatConductor(conversationId: number) {
         return;
       }
 
-      const apiKeys = { openAiApiKey, googleApiKey };
+      const apiKeys = { openAiApiKey, googleApiKey, mistralApiKey };
       if (!Object.values(apiKeys).some(Boolean)) {
         console.log('[Conductor] Missing API key');
         stopConductor();
