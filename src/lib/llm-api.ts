@@ -46,7 +46,9 @@ export async function callLlmApi(options: LlmApiOptions): Promise<string> {
       apiKey,
     );
   } catch (error) {
-    console.error('Failed to call LLM API:', error);
+    if (error instanceof Error && error.name !== 'AbortError') {  
+      console.error('Failed to call LLM API:', error);  
+    }
     return '';
   }
 }

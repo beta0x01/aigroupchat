@@ -15,7 +15,7 @@ const getNextMessageDelay = (lastMessage: Message | undefined): number => {
   }
   const wordCount = lastMessage.content.split(/\s+/).length;
   const delay = Math.max(2000, wordCount * 250);
-  return Math.min(delay, 8000);
+  return Math.min(delay, 5000);
 };
 
 export function useChatConductor(conversationId: number) {
@@ -170,10 +170,22 @@ export function useChatConductor(conversationId: number) {
         stopConductor();
         return;
       }
+      if (nextSpeakerId === 'user') {  
+        console.log('[Conductor] User selected - waiting');
+        // Don't fully stop, just finish this turn
+        finishTurn();
+        isProcessingRef.current = false;
+        return;  
+      }
 
-      setThinkingAgentId(nextSpeakerId);
-      await updateConversation(conversationId, { nextSpeakerId });
-      console.log(`[Conductor] Next speaker is ${nextSpeakerId}`);
+      const speakerId = typeof nextSpeakerId === 'number' ? nextSpeakerId : parseInt(String(nextSpeakerId), 10);
+      if (isNaN(speakerId)) {
+        console.error('[Conductor] Invalid speaker ID:', nextSpeakerId);
+        return;
+      }
+      setThinkingAgentId(speakerId);
+      await updateConversation(conversationId, { nextSpeakerId: speakerId });
+      console.log(`[Conductor] Next speaker is ${speakerId}`);
 
       const delay = forcedNextSpeakerId
         ? 0
@@ -210,7 +222,7 @@ export function useChatConductor(conversationId: number) {
       const agent = agents.find((a) => a.id === nextSpeakerId);
 
       const responseContent = await generateAgentResponse(
-        nextSpeakerId,
+        speakerId,
         messages,
         agents,
         apiKeys,
@@ -231,7 +243,7 @@ export function useChatConductor(conversationId: number) {
         );
         await addMessage({
           conversationId,
-          agentId: nextSpeakerId,
+          agentId: speakerId,
           content: responseContent,
         });
 
@@ -269,50 +281,40 @@ export function useChatConductor(conversationId: number) {
   const handleUserTyping = useCallback(() => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
     }
 
+    // Cancel pending turn if user is typing
     if (isThinking && !requestStartedRef.current) {
-      console.log('[Conductor] User typing, cancelling pending message');
       stopConductor();
       needsRestartRef.current = true;
+    } else {
+      needsRestartRef.current = false; // Clear if not applicable
     }
 
-    if (needsRestartRef.current) {
-      typingTimeoutRef.current = setTimeout(() => {
-        if (needsRestartRef.current) {
-          console.log('[Conductor] Restarting after typing cooldown');
-          needsRestartRef.current = false;
-          runNextTurn();
-        }
-      }, USER_TYPING_COOLDOWN);
-    }
-  }, [isThinking, runNextTurn, stopConductor]);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (needsRestartRef.current && !isPaused) {
+        needsRestartRef.current = false;
+        runNextTurn();
+      }
+    }, USER_TYPING_COOLDOWN);
+  }, [isThinking, isPaused, runNextTurn, stopConductor]);
 
   useEffect(() => {
-    return () => {
-      stopConductor();
-    };
-  }, [stopConductor]);
-
-  useEffect(() => {
-    // Only clear the timer, don't stop the entire conductor
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
     
     const lastMessage = messages[messages.length - 1];
-    if (isPaused) {
-      if (!lastMessage || lastMessage.agentId !== 'user') return;
+    
+    if (isPaused && (!lastMessage || lastMessage.agentId !== 'user')) {
+      return;
     }
     
-    if (!isPaused || !lastMessage || lastMessage.agentId === 'user') {
-      startConductor();
-      timerRef.current = setTimeout(() => {
-        runNextTurn();
-      }, NEXT_SPEAKER_DELAY);
-    }
+    startConductor();
+    timerRef.current = setTimeout(() => {
+      runNextTurn();
+    }, NEXT_SPEAKER_DELAY);
     
     return () => {
       if (timerRef.current) {
@@ -320,14 +322,12 @@ export function useChatConductor(conversationId: number) {
         timerRef.current = null;
       }
     };
-  }, [messages, isPaused, runNextTurn, startConductor]);
+  }, [messages.length, isPaused, runNextTurn, startConductor]);
 
   const pause = () => setAutoAdvance(false);
   const resume = () => setAutoAdvance(true);
 
   const forceTurn = (agentId: number) => {
-    console.log(`Forcing turn for agent ${agentId}`);
-    // Cancel any pending or in-progress request before forcing a turn
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -336,8 +336,12 @@ export function useChatConductor(conversationId: number) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    
     finishTurn();
     isProcessingRef.current = false;
+    requestStartedRef.current = false; // Add this
+    needsRestartRef.current = false;   // Add this
+    
     runNextTurn(agentId);
   };
 

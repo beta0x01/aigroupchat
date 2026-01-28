@@ -63,7 +63,7 @@ export async function determineNextSpeaker(
   maxContextMessages: number,
   model?: string,
   signal?: AbortSignal,
-): Promise<number | null> {
+): Promise<number | string | null> {
   const isFirstTurn = conversationMessages.length === 0;
   const promptTemplate = isFirstTurn ? Prompts.firstSpeaker() : Prompts.nextSpeaker();
   const agentsList = agents
@@ -95,6 +95,9 @@ export async function determineNextSpeaker(
   console.log('[chat-logic] determineNextSpeaker response', response);
 
   const nextSpeaker = agents.find((a) => response.includes(a.name));
+  if (response.toLowerCase().includes('user')) {  
+    return 'user';
+  }
   return nextSpeaker ? nextSpeaker.id : null;
 }
 
@@ -103,7 +106,7 @@ export async function generateAgentResponse(
   conversationMessages: Message[],
   agents: Agent[],
   apiKeys: ApiKeys,
-  options: { checkIn?: boolean; traits?: string } = {},
+  options: { checkIn?: boolean; traits?: string | null | undefined } = {},
   maxContextMessages: number,
   signal?: AbortSignal,
 ): Promise<string> {
