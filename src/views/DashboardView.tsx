@@ -7,8 +7,8 @@ import { useSettingsStore } from '../store/settingsStore';
 const DashboardView: React.FC = () => {
   const navigate = useNavigate();
   const { conversations, fetchConversations, deleteConversation } = useConversationStore();
-  const { openAiApiKey, googleApiKey } = useSettingsStore();
-  const hasApiKey = Boolean(openAiApiKey || googleApiKey);
+  const { openAiApiKey, googleApiKey, mistralApiKey } = useSettingsStore();
+  const hasApiKey = Boolean(openAiApiKey || googleApiKey || mistralApiKey);
 
   useEffect(() => {
     fetchConversations();

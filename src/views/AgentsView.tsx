@@ -15,10 +15,10 @@ const AgentsView: React.FC = () => {
     deleteCustomAgent,
     updateAgent,
   } = useAgentStore();
-  const { openAiApiKey, googleApiKey, initialized } = useSettingsStore();
+  const { openAiApiKey, googleApiKey, mistralApiKey, initialized } = useSettingsStore();
   const apiKeys = useMemo(
-    () => ({ openAiApiKey, googleApiKey }),
-    [openAiApiKey, googleApiKey],
+    () => ({ openAiApiKey, googleApiKey, mistralApiKey }),
+    [openAiApiKey, googleApiKey, mistralApiKey],
   );
   const availableModels = useMemo(
     () => getAvailableModels(apiKeys),

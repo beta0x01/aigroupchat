@@ -314,8 +314,8 @@ export const ChatSidebar = ({
 }) => {
   const { activeConversation, setActiveConversation } = useChatStore();
   const { updateConversation } = useConversationStore();
-  const { openAiApiKey, googleApiKey, initialized } = useSettingsStore();
-  const apiKeys = { openAiApiKey, googleApiKey };
+  const { openAiApiKey, googleApiKey, mistralApiKey, initialized } = useSettingsStore();
+  const apiKeys = { openAiApiKey, googleApiKey, mistralApiKey };
   const availableModels = getAvailableModels(apiKeys);
   const defaultModel = getDefaultModel(apiKeys);
 
