@@ -14,8 +14,8 @@ const NewConversationSetupView: React.FC = () => {
 
   const { presetAgents, customAgents, fetchCustomAgents } = useAgentStore();
   const { addConversation } = useConversationStore();
-  const { openAiApiKey, googleApiKey } = useSettingsStore();
-  const apiKeys = { openAiApiKey, googleApiKey };
+  const { openAiApiKey, googleApiKey, mistralApiKey } = useSettingsStore();
+  const apiKeys = { openAiApiKey, googleApiKey, mistralApiKey };
 
   const [title, setTitle] = useState('');
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
@@ -47,10 +47,10 @@ const NewConversationSetupView: React.FC = () => {
   }, [conversationId]);
 
   useEffect(() => {
-    if (!openAiApiKey && !googleApiKey) {
+    if (!openAiApiKey && !googleApiKey && !mistralApiKey) {
       navigate('/settings');
     }
-  }, [openAiApiKey, googleApiKey, navigate]);
+  }, [openAiApiKey, googleApiKey, mistralApiKey, navigate]);
 
   const toggleAgent = (id: number) => {
     setSelectedAgents((prev) => {
