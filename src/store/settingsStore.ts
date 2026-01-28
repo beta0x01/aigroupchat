@@ -5,6 +5,7 @@ import { getDefaultModel } from '../lib/llm-providers';
 interface SettingsState {
   openAiApiKey: string;
   googleApiKey: string;
+  mistralApiKey: string;
   autoAdvance: boolean;
   maxAutoAdvance: number;
   maxContextMessages: number;
@@ -13,6 +14,7 @@ interface SettingsState {
   init: () => Promise<void>;
   setOpenAiApiKey: (key: string) => Promise<void>;
   setGoogleApiKey: (key: string) => Promise<void>;
+  setMistralApiKey: (key: string) => Promise<void>;
   setAutoAdvance: (value: boolean) => Promise<void>;
   setMaxAutoAdvance: (value: number) => Promise<void>;
   setMaxContextMessages: (value: number) => Promise<void>;
@@ -22,6 +24,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>((set) => ({
   openAiApiKey: '',
   googleApiKey: '',
+  mistralApiKey: '',
   autoAdvance: true,
   maxAutoAdvance: 7,
   maxContextMessages: 20,
@@ -30,6 +33,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   init: async () => {
     const openAiKeyResult = await db.settings.get('openaiApiKey');
     const googleKeyResult = await db.settings.get('googleApiKey');
+    const mistralKeyResult = await db.settings.get('googleApiKey');
     const autoAdvResult = await db.settings.get('autoAdvance');
     const maxAutoAdvResult = await db.settings.get('maxAutoAdvance');
     const maxContextResult = await db.settings.get('maxContextMessages');
@@ -37,10 +41,12 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     const apiKeys = {
       openAiApiKey: openAiKeyResult?.value,
       googleApiKey: googleKeyResult?.value,
+      mistralApiKey: mistralKeyResult?.value,
     };
     set({
       openAiApiKey: openAiKeyResult?.value || '',
       googleApiKey: googleKeyResult?.value || '',
+      mistralApiKey: mistralKeyResult?.value || '',
       autoAdvance: autoAdvResult ? autoAdvResult.value === 'true' : true,
       maxAutoAdvance: maxAutoAdvResult
         ? Math.max(2, Math.min(999, Number(maxAutoAdvResult.value)))
@@ -60,6 +66,10 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setGoogleApiKey: async (key) => {
     await db.settings.put({ key: 'googleApiKey', value: key });
     set({ googleApiKey: key });
+  },
+  setMistralApiKey: async (key) => {  
+  await db.settings.put({ key: 'mistralApiKey', value: key });  
+  set({ mistralApiKey: key });  
   },
   setAutoAdvance: async (value) => {
     await db.settings.put({ key: 'autoAdvance', value: String(value) });

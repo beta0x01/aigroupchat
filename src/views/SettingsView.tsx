@@ -10,12 +10,14 @@ const SettingsView: React.FC = () => {
   const {
     openAiApiKey,
     googleApiKey,
+    mistralApiKey,
     autoAdvance,
     maxAutoAdvance,
     maxContextMessages,
     nextSpeakerModel,
     setOpenAiApiKey,
     setGoogleApiKey,
+    setMistralApiKey,
     setAutoAdvance,
     setMaxAutoAdvance,
     setMaxContextMessages,
@@ -23,7 +25,7 @@ const SettingsView: React.FC = () => {
     init,
   } = useSettingsStore();
 
-  const apiKeys = { openAiApiKey, googleApiKey };
+  const apiKeys = { openAiApiKey, googleApiKey, mistralApiKey };
   const availableModels = getAvailableModels(apiKeys);
   const defaultModel = getDefaultModel(apiKeys);
   const nextSpeakerModelValue = availableModels.some(
@@ -46,8 +48,10 @@ const SettingsView: React.FC = () => {
 
   const [openAiSaved, setOpenAiSaved] = useState(false);
   const [googleSaved, setGoogleSaved] = useState(false);
+  const [mistralSaved, setMistralSaved] = useState(false);
   const openAiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const googleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mistralTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleOpenAiChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -57,6 +61,16 @@ const SettingsView: React.FC = () => {
     setOpenAiSaved(true);
     if (openAiTimeoutRef.current) clearTimeout(openAiTimeoutRef.current);
     openAiTimeoutRef.current = setTimeout(() => setOpenAiSaved(false), 2000);
+  };
+
+  const handleMistralChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    await setMistralApiKey(value);
+    setMistralSaved(true);
+    if (mistralTimeoutRef.current) clearTimeout(mistralTimeoutRef.current);
+    mistralTimeoutRef.current = setTimeout(() => setMistralSaved(false), 2000);
   };
 
   const handleGoogleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +228,27 @@ const SettingsView: React.FC = () => {
               </span>
             )}
           </div>
+        </div>
+        <div className="space-y-2">  
+          <label htmlFor="mistralApiKey" className="block text-sm font-medium">  
+            Mistral API Key  
+          </label>  
+          <div className="relative">  
+            <input  
+              id="mistralApiKey"  
+              type="password"  
+              placeholder="Mistral API Key... (32 Chars azAZ09)"  
+              className="w-full p-2 rounded bg-gray-700 text-white"  
+              value={mistralApiKey}  
+              onChange={handleMistralChange}  
+            />  
+            {mistralSaved && (  
+              <span className="absolute right-0 -top-5 flex items-center gap-1 text-xs text-green-500 whitespace-nowrap">  
+                <Check className="h-4 w-4" />  
+                Saved  
+              </span>  
+            )}  
+          </div>  
         </div>
       </section>
 

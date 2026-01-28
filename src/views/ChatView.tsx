@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { ChatInput } from '../components/chat/ChatInput';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { useMessageStore } from '../store/messageStore';
@@ -103,8 +103,8 @@ export const ChatView = () => {
       {numericId > 0 && (
         <>
           <div
-            className={`fixed inset-y-0 left-0 z-50 transform transition-transform md:relative md:translate-x-0 ${
-              sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            className={`fixed inset-y-0 left-0 z-50 transform transition-transform ${  
+              sidebarOpen ? 'translate-x-0' : '-translate-x-full'  
             }`}
           >
             <ChatSidebar
@@ -115,7 +115,7 @@ export const ChatView = () => {
           </div>
           {sidebarOpen && (
             <div
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              className="fixed inset-0 bg-black/50 z-40"  
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -123,10 +123,10 @@ export const ChatView = () => {
       )}
       <main className="relative flex flex-1 flex-col bg-gradient-primary text-white">
         <button
-          className="md:hidden absolute top-4 left-4 z-10 p-2 rounded hover:bg-gray-700"
-          onClick={() => setSidebarOpen(true)}
+          className="absolute top-4 left-4 z-10 p-2 rounded hover:bg-gray-700"  
+          onClick={() => setSidebarOpen(!sidebarOpen)}
         >
-          <Menu />
+          {sidebarOpen ? <X /> : <Menu />}
         </button>
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">

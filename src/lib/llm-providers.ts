@@ -12,6 +12,7 @@ export interface LlmCallParams {
 export interface ApiKeys {
   openAiApiKey?: string;
   googleApiKey?: string;
+  mistralApiKey?: string;
   [key: string]: string | undefined;
 }
 
@@ -102,6 +103,38 @@ const geminiCall = async (
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 };
 
+const mistralCall = async (  
+  { model, messages, temperature, max_tokens, stop, signal }: LlmCallParams,  
+  apiKey: string,  
+): Promise<string> => {  
+  const response = await fetch('https://api.mistral.ai/v1/chat/completions', {  
+    method: 'POST',  
+    headers: {  
+      'Content-Type': 'application/json',  
+      'Authorization': `Bearer ${apiKey}`,  
+    },  
+    signal,  
+    body: JSON.stringify({  
+      model,  
+      messages,  
+      temperature,  
+      max_tokens,  
+      stop,  
+    }),  
+  });  
+  
+  if (!response.ok) {  
+    const errorData = await response.json();  
+    console.error('LLM API Error:', errorData);  
+    throw new Error(  
+      `API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`,  
+    );  
+  }  
+  
+  const data = await response.json();  
+  return data.choices[0]?.message?.content?.trim() || '';  
+};
+
 export const LLM_PROVIDERS: LlmProvider[] = [
   {
     id: 'openai',
@@ -127,6 +160,17 @@ export const LLM_PROVIDERS: LlmProvider[] = [
     ],
     call: geminiCall,
   },
+  {  
+    id: 'mistral',  
+    apiKeyName: 'mistralApiKey',  
+    defaultModel: 'mistral-large-latest',  
+    models: [  
+      { id: 'mistral-large-latest', label: 'mistral-large-latest', maxTokens: 64000 },
+      { id: 'codestral-latest', label: 'codestral-latest', maxTokens: 64000 },
+      { id: 'mistral-small-latest', label: 'mistral-small-latest', maxTokens: 64000 },
+  ],  
+  call: mistralCall,  
+  }, 
 ];
 export const DEFAULT_MODEL = LLM_PROVIDERS[0].defaultModel;
 export const ALL_MODELS = LLM_PROVIDERS.flatMap((p) => p.models);

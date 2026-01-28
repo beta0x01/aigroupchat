@@ -57,7 +57,7 @@ const NewConversationSetupView: React.FC = () => {
       if (prev.includes(id)) {
         return prev.filter((a) => a !== id);
       }
-      if (prev.length >= 4) return prev;
+      if (prev.length >= 20) return prev;
       return [...prev, id];
     });
   };
@@ -101,7 +101,7 @@ const NewConversationSetupView: React.FC = () => {
         agents={[...presetAgents, ...customAgents]}
         selectedIds={selectedAgents}
         onToggle={toggleAgent}
-        maxSelect={4}
+        maxSelect={20}
       />
       <p className="text-sm mt-2">
         Need more options?{' '}

@@ -22,8 +22,8 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         <>
           {/* Mobile overlay */}
           <div
-            className={`fixed inset-y-0 left-0 z-50 transform bg-gray-800 transition-transform md:relative md:translate-x-0 ${
-              sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            className={`fixed inset-y-0 left-0 z-50 transform bg-gray-800 transition-transform ${  
+              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
             <div className="md:hidden flex justify-end p-2">
@@ -38,7 +38,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
           {sidebarOpen && (
             <div
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              className="fixed inset-0 bg-black/50 z-40"
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -47,10 +47,10 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       <main className="relative flex-1 flex flex-col overflow-y-auto">
         {!isChatView && (
           <button
-            className="md:hidden absolute top-4 left-4 z-10 p-2 rounded hover:bg-gray-800"
-            onClick={() => setSidebarOpen(true)}
+            className="absolute top-4 left-4 z-10 p-2 rounded hover:bg-gray-800"  
+            onClick={() => setSidebarOpen(!sidebarOpen)}  
           >
-            <Menu />
+            {sidebarOpen ? <X /> : <Menu />}
           </button>
         )}
         <div className={`flex-1 flex flex-col ${!isChatView ? 'pt-16 md:pt-0' : ''}`}>{children}</div>
